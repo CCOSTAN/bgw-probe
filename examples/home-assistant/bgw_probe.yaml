@@ -1,0 +1,48 @@
+######################################################################
+# BGW Probe - Home Assistant package example
+# Replace PROBE_HOST with the host running the probe container.
+######################################################################
+
+rest:
+  - resource: http://PROBE_HOST:8080/api/v1/status
+    scan_interval: 60
+    timeout: 10
+    sensor:
+      - name: BGW Gateway Status
+        unique_id: bgw_gateway_status
+        icon: mdi:router-network
+        value_template: "{{ value_json.status }}"
+        json_attributes_path: "$.gateway"
+        json_attributes:
+          - manufacturer
+          - model
+          - firmware
+
+      - name: BGW Gateway Uptime
+        unique_id: bgw_gateway_uptime
+        device_class: duration
+        state_class: measurement
+        unit_of_measurement: s
+        value_template: "{{ value_json.gateway.uptime_seconds }}"
+
+      - name: BGW Broadband Receive Bytes
+        unique_id: bgw_broadband_receive_bytes
+        device_class: data_size
+        state_class: total_increasing
+        unit_of_measurement: B
+        value_template: "{{ value_json.broadband.rx_bytes }}"
+
+      - name: BGW Broadband Transmit Bytes
+        unique_id: bgw_broadband_transmit_bytes
+        device_class: data_size
+        state_class: total_increasing
+        unit_of_measurement: B
+        value_template: "{{ value_json.broadband.tx_bytes }}"
+
+    binary_sensor:
+      - name: BGW Broadband Connection
+        unique_id: bgw_broadband_connection
+        device_class: connectivity
+        value_template: >-
+          {{ value_json.broadband.connection == 'up' and
+             value_json.broadband.line_state == 'up' }}
