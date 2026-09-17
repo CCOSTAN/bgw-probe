@@ -59,6 +59,10 @@ uses one REST request to create connectivity, uptime, and traffic entities.
 Copy it into your package directory, replace `PROBE_HOST`, and run a Home
 Assistant configuration check before restarting.
 
+An example Home Assistant Network dashboard card built from those entities:
+
+<img src="docs/images/home-assistant-network-card.png" alt="Home Assistant BGW gateway status card" width="398">
+
 ## Configuration
 
 | Variable | Default | Purpose |
