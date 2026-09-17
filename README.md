@@ -9,6 +9,15 @@ The initial release is tested with a BGW210-700. The parser targets page and
 field names shared by BGW210 and BGW320 firmware, but additional gateway and
 firmware reports are welcome.
 
+## Video walkthrough
+
+[![Monitor an AT&T BGW210/BGW320 Gateway in Home Assistant](https://img.youtube.com/vi/ovNJnaVPWAY/maxresdefault.jpg)](https://youtu.be/ovNJnaVPWAY)
+
+The short walkthrough shows the probe, its Home Assistant entities, and the
+Network dashboard card built from those signals.
+
+[Watch on YouTube](https://youtu.be/ovNJnaVPWAY) · [Read the companion article](https://www.vcloudinfo.com/2026/09/monitor-att-bgw210-bgw320-gateway-home-assistant.html)
+
 ## What it exposes
 
 - Gateway model, firmware, manufacturer, and uptime
