@@ -5,10 +5,17 @@ from __future__ import annotations
 import argparse
 import json
 import logging
+import os
 
 from .collector import Collector, GatewayClient
 from .config import Settings
 from .server import Poller, ProbeServer, StateStore
+
+
+def _configure_logging() -> None:
+    level_name = os.getenv("BGW_LOG_LEVEL", "INFO").strip().upper()
+    level = logging.getLevelNamesMapping().get(level_name, logging.INFO)
+    logging.basicConfig(level=level, format="%(levelname)s %(message)s")
 
 
 def _parser() -> argparse.ArgumentParser:
@@ -25,7 +32,7 @@ def _parser() -> argparse.ArgumentParser:
 
 def main() -> int:
     args = _parser().parse_args()
-    logging.basicConfig(level=logging.INFO, format="%(levelname)s %(message)s")
+    _configure_logging()
     settings = Settings.from_env()
     collector = Collector(GatewayClient(settings).fetch)
 

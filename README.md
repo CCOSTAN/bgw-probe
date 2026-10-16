@@ -76,6 +76,7 @@ An example Home Assistant Network dashboard card built from those entities:
 
 | Variable | Default | Purpose |
 | --- | --- | --- |
+| `BGW_LOG_LEVEL` | `INFO` | Logging verbosity (`DEBUG`, `INFO`, `WARNING`, `ERROR`, or `CRITICAL`; invalid values use `INFO`) |
 | `BGW_URL` | `https://192.168.1.254` | Gateway root URL |
 | `BGW_TIMEOUT_SECONDS` | `8` | Per-page request timeout |
 | `BGW_POLL_INTERVAL_SECONDS` | `60` | Collection interval |
