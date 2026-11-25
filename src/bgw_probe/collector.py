@@ -47,10 +47,13 @@ def _number(value: str | None) -> int | float | None:
 def _duration_seconds(value: str | None) -> int | None:
     if not value:
         return None
-    parts = value.strip().split(":")
-    if len(parts) not in {3, 4}:
-        return None
+    candidate = value.strip()
     try:
+        if candidate.isdecimal():
+            return int(candidate)
+        parts = candidate.split(":")
+        if len(parts) not in {3, 4}:
+            return None
         numbers = [int(part) for part in parts]
     except ValueError:
         return None

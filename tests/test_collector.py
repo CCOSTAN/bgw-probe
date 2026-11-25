@@ -45,6 +45,26 @@ class CollectorTests(unittest.TestCase):
         self.assertNotIn("00:11:22:33:44:55", rendered)
         self.assertNotIn("203.0.113.25", rendered)
 
+    def test_collector_reads_uptime_reported_as_seconds(self) -> None:
+        system = PAGES["system"].replace(
+            "<tr><td>Time Since Last Reboot</td><td>01:02:03:04</td></tr>",
+            '<tr><th scope="row">Time Since Last Reboot</th>'
+            '<td class="col2">103561</td></tr>',
+        )
+
+        def fetch(page: str) -> str:
+            return system if page == "system" else PAGES[page]
+
+        result = Collector(fetch).collect()
+        self.assertEqual(result["gateway"]["uptime_seconds"], 103561)
+
+    def test_unusable_numeric_uptime_preserves_other_metrics(self) -> None:
+        pages = dict(PAGES)
+        pages["system"] = pages["system"].replace("01:02:03:04", "9" * 10_000)
+        result = Collector(pages.__getitem__).collect()
+        self.assertEqual(result["status"], "ok")
+        self.assertNotIn("uptime_seconds", result["gateway"])
+
     def test_collector_reports_partial_failure_without_exception_text(self) -> None:
         def fetch(page: str) -> str:
             if page == "firewall":
