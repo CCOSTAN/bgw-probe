@@ -124,5 +124,14 @@ class ProbeHandler(BaseHTTPRequestHandler):
 
         self._json(HTTPStatus.NOT_FOUND, {"status": "not_found"})
 
+    def log_request(self, code: int | str = "-", size: int | str = "-") -> None:
+        if isinstance(code, int):
+            level = logging.DEBUG if code < HTTPStatus.BAD_REQUEST else logging.WARNING
+            LOGGER.log(level, "http %d", code)
+        else:
+            LOGGER.warning("http status unknown")
+
     def log_message(self, format: str, *args: object) -> None:
-        LOGGER.info("http %s", args[1] if len(args) > 1 else "request")
+        # BaseHTTPRequestHandler can include request text here. log_request
+        # records the response status, including for protocol errors.
+        pass
