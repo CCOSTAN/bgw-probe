@@ -3,7 +3,7 @@ import logging
 import threading
 import unittest
 
-from bgw_probe.server import ProbeHandler, ProbeServer, StateStore
+from bgw_probe.server import ProbeServer, StateStore
 
 
 class StateStoreTests(unittest.TestCase):
@@ -26,35 +26,26 @@ class RequestLoggingTests(unittest.TestCase):
         thread.start()
         try:
             connection = HTTPConnection(*server.server_address)
-            with self.assertLogs("bgw_probe.server", level="DEBUG") as successful_logs:
-                connection.request("GET", "/healthz")
-                response = connection.getresponse()
-                self.assertEqual(response.status, 200)
-                response.read()
-            self.assertEqual(successful_logs.records[0].levelno, logging.DEBUG)
-            self.assertEqual(successful_logs.records[0].getMessage(), "http 200")
-
-            with self.assertLogs("bgw_probe.server", level="DEBUG") as error_logs:
-                connection.request("GET", "/missing")
-                response = connection.getresponse()
-                self.assertEqual(response.status, 404)
-                response.read()
-            self.assertEqual(error_logs.records[0].levelno, logging.WARNING)
-            self.assertEqual(error_logs.records[0].getMessage(), "http 404")
+            for method, path, status, level in (
+                ("GET", "/healthz", 200, logging.DEBUG),
+                ("GET", "/missing", 404, logging.WARNING),
+                ("POST", "/private-path", 501, logging.WARNING),
+            ):
+                with self.subTest(method=method, status=status):
+                    with self.assertLogs("bgw_probe.server", level="DEBUG") as logs:
+                        connection.request(method, path)
+                        response = connection.getresponse()
+                        self.assertEqual(response.status, status)
+                        response.read()
+                    self.assertEqual(
+                        [(entry.levelno, entry.getMessage()) for entry in logs.records],
+                        [(level, f"http {status}")],
+                    )
             connection.close()
         finally:
             server.shutdown()
             server.server_close()
             thread.join()
-
-    def test_error_messages_are_logged_as_warnings(self) -> None:
-        with self.assertLogs("bgw_probe.server", level="WARNING") as logs:
-            handler = object.__new__(ProbeHandler)
-            handler.log_message("bad %s", "request")
-            handler.log_message("bad %d", "request")
-        self.assertEqual(logs.records[0].levelno, logging.WARNING)
-        self.assertEqual(logs.records[0].getMessage(), "http error: bad request")
-        self.assertEqual(logs.records[1].getMessage(), "http error: bad %d request")
 
 
 if __name__ == "__main__":

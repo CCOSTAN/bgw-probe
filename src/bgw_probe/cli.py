@@ -14,7 +14,9 @@ from .server import Poller, ProbeServer, StateStore
 
 def _configure_logging() -> None:
     level_name = os.getenv("BGW_LOG_LEVEL", "INFO").strip().upper()
-    level = logging.getLevelNamesMapping().get(level_name, logging.INFO)
+    if level_name not in {"DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"}:
+        level_name = "INFO"
+    level = logging.getLevelNamesMapping()[level_name]
     logging.basicConfig(level=level, format="%(levelname)s %(message)s")
 
 

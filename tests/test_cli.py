@@ -12,6 +12,7 @@ class LoggingConfigurationTests(unittest.TestCase):
             ("DEBUG", logging.DEBUG),
             ("warning", logging.WARNING),
             ("not-a-level", logging.INFO),
+            ("NOTSET", logging.INFO),
         ]
         for value, expected_level in cases:
             with self.subTest(value=value), patch.dict(
