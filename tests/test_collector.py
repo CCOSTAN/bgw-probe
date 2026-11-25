@@ -58,6 +58,13 @@ class CollectorTests(unittest.TestCase):
         result = Collector(fetch).collect()
         self.assertEqual(result["gateway"]["uptime_seconds"], 103561)
 
+    def test_unusable_numeric_uptime_preserves_other_metrics(self) -> None:
+        pages = dict(PAGES)
+        pages["system"] = pages["system"].replace("01:02:03:04", "9" * 10_000)
+        result = Collector(pages.__getitem__).collect()
+        self.assertEqual(result["status"], "ok")
+        self.assertNotIn("uptime_seconds", result["gateway"])
+
     def test_collector_reports_partial_failure_without_exception_text(self) -> None:
         def fetch(page: str) -> str:
             if page == "firewall":
