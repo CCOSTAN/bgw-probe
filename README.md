@@ -29,6 +29,8 @@ Network dashboard card built from those signals.
   readings with alarm/warning thresholds
 - Collector freshness and per-page success or failure
 
+The probe requests the fiber page on BGW320 models only. A fiber-page failure is
+reported in `collector.failed_pages` and does not change overall gateway health.
 Fiber sensor readings include `current`, `alarm_low`, `alarm_high`,
 `warning_low`, and `warning_high` values when present. Temperature is
 normalized to °C and Tx/Rx power to dBm; `vcc` and `tx_bias` are emitted as raw

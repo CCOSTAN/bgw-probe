@@ -6,7 +6,7 @@ PAGES = {
     "system": """
       <table>
         <tr><td>Manufacturer</td><td>ARRIS</td></tr>
-        <tr><td>Model Number</td><td>BGW210-700</td></tr>
+        <tr><td>Model Number</td><td>BGW320-500</td></tr>
         <tr><td>Serial Number</td><td>SECRET-SERIAL</td></tr>
         <tr><td>Software Version</td><td>4.28.8</td></tr>
         <tr><td>MAC Address</td><td>00:11:22:33:44:55</td></tr>
@@ -163,6 +163,37 @@ class CollectorTests(unittest.TestCase):
             result["collector"]["failed_pages"], {"firewall": "timeout"}
         )
         self.assertNotIn("contains-private-host", str(result))
+
+    def test_bgw210_skips_the_fiber_page(self) -> None:
+        requested = []
+
+        def fetch(page: str) -> str:
+            requested.append(page)
+            return PAGES[page].replace("BGW320-500", "BGW210-700")
+
+        result = Collector(fetch).collect()
+        self.assertNotIn("fiber", requested)
+        self.assertEqual(result["status"], "ok")
+
+    def test_optional_fiber_failure_preserves_gateway_status(self) -> None:
+        def fetch(page: str) -> str:
+            if page == "fiber":
+                raise TimeoutError("private-host")
+            return PAGES[page]
+
+        result = Collector(fetch).collect()
+        self.assertEqual(result["status"], "ok")
+        self.assertEqual(result["collector"]["failed_pages"], {"fiber": "timeout"})
+
+    def test_missing_fiber_numbers_are_omitted(self) -> None:
+        pages = dict(PAGES)
+        pages["fiber"] = pages["fiber"].replace(">1270 nm<", "><").replace(
+            ">40</td>", ">NaN</td>"
+        )
+        result = Collector(pages.__getitem__).collect()
+        self.assertNotIn("wave_length", result["fiber"])
+        self.assertNotIn("length_smf_km", result["fiber"])
+        self.assertEqual(result["fiber"]["sensors"]["temperature_c"]["current"], 40)
 
 
 if __name__ == "__main__":
